@@ -1,2 +1,2 @@
-# Password_Manager
+# Password Manager 🔐
 Password manager that can generate password for any website or app you want! 🤗
