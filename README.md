@@ -6,6 +6,6 @@ Password manager that can generate password for any website or app you want! ğŸ¤
   
 - [x] Lists comprehension ğŸ¤“
 
-## Code sneak peek:
+## Code Sneak peek:
 ![image](image.gif)
 
