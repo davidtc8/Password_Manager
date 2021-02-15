@@ -9,5 +9,5 @@ Password manager that can generate password for any website or app you want! ğŸ¤
 - [x] Handling Errors
 
 ## Code Sneak peek:
-![image](image.gif)
+![image2](image2.gif)
 
