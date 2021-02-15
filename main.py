@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import random
+import json
 
 # ---------------------------- CONSTANTS ------------------------------- #
 FONT_NAME = "Roboto Slab"
@@ -16,7 +17,6 @@ nr_numbers = random.randint(2, 4)
 
 def random_password():
     # list comprehension: new_list = [new_item for item in list]
-    password_list = []
     password_list = [random.choice(letters) for char in range(nr_letters)]
     password_list += [random.choice(symbols) for char in range(nr_symbols)]
     password_list += [random.choice(numbers) for char in range(nr_numbers)]
@@ -40,11 +40,32 @@ def random_password():
 
     return password_entry.insert(END, string = password)
 
+# ---------------------------- SEARCH BUTTON ------------------------------- #
+def find_password():
+    website = website_entry.get()
+    try:
+        with open(file="passwords.json", mode="r") as file:
+            data = json.load(file)
+    except FileNotFoundError:
+        messagebox.showinfo(title = "Error", message = f"You have not saved an account for {website} yet")
+    # if the try succeeds, you can continue with this else
+    else:
+        if website in data:
+            email = data[website]["email"]
+            password = data[website]['password']
+            return messagebox.showinfo(title = website, message= f"email: {email} \npassword: {password}")
+        else:
+            messagebox.showinfo(title="Error", message=f"You have not saved an account for {website} yet")
+
 # ---------------------------- SAVE PASSWORD ------------------------------- #
 def save_password():
     website = website_entry.get()
     email = email_entry.get()
     password = password_entry.get()
+    new_data = {website: {
+        "email": email,
+        "password" : password,
+    }}
 
     # what happens if the user doesn't enter anything either in the password or website
     if len(website) == 0 or len(password) == 0:
@@ -55,12 +76,28 @@ def save_password():
         is_ok = messagebox.askokcancel(title= website, message= double_check)
 
         if is_ok == True:
-            # Opening the "passwords.txt"
-            with open(file = "passwords.txt", mode = "a") as file:
-                file.write(f"{website} | {email} | {password}\n")
-                website_entry.delete(0, END)
-                password_entry.delete(0, END)
-
+            try:
+                # Write into the passwords.json file
+                with open(file = "passwords.json", mode = "r") as file:
+                    # this is how you write into a json file
+                    #json.dump(new_data, file, indent = 4)
+                    # this is how you raed from a json file
+                    #data = json.load(file)
+                    #print(data)
+                    # this is how you update data in a json file without overwrite it
+                    # Step 1: Reading Old Data
+                    data = json.load(file)
+                    # Step 2: Updating old data
+                    data.update(new_data)
+                # With open the data in write mode
+                with open(file="passwords.json", mode="w") as file:
+                    # Saving updated data
+                    json.dump(data, file, indent = 4)
+                    website_entry.delete(0, END)
+                    password_entry.delete(0, END)
+            except FileNotFoundError:
+                with open(file="passwords.json", mode="w") as file:
+                    json.dump(new_data, file, indent = 4)
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -80,10 +117,14 @@ website_label = Label(text = "Website:", font = (FONT_NAME, 15, "bold"))
 website_label.grid(column= 0, row = 1)
 
 # Website entry
-website_entry = Entry(width = 35)
+website_entry = Entry(width = 20)
 # put cursor right in website from the begninning
 website_entry.focus()
-website_entry.grid(column = 1, row = 1, columnspan=2)
+website_entry.grid(column = 1, row = 1)
+
+# Search Button
+search_button = Button(text = "Search", command = find_password, width = 15)
+search_button.grid(column = 2, row =1)
 
 # Email/Username Label
 email_label = Label(text = "Email/Username:", font = (FONT_NAME, 15, "bold"))
